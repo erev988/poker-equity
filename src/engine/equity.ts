@@ -7,9 +7,9 @@ export function calculate(r:Request,progress:(p:number)=>void=()=>{}):Result{
  let wins=0,ties=0,sum=0,sum2=0,totalWeight=0,count=0;
  const add=(board:number[],hands:number[][],weight=1)=>{const own=score([...r.hole,...board]);let same=1,lost=false;for(const hand of hands){const other=score([...hand,...board]);if(other>own){lost=true;break}if(other===own)same++}const share=lost?0:1/same;if(!lost){if(same===1)wins+=weight;else ties+=weight}sum+=share*weight;sum2+=share*share*weight;totalWeight+=weight;count++};
  const missing=5-r.board.length;
- const states=ranges[0].length*(missing===0?1:missing===1?deck.length-2:Infinity);
+ const states=ranges[0].length*(missing===0?1:missing===1?deck.length-2:missing===2?(deck.length-2)*(deck.length-3)/2:Infinity);
  const exact=r.opponents===1&&states<=60000;
- if(exact){for(const combo of ranges[0]){if(!missing)add(r.board,[combo.cards],combo.weight);else for(const card of deck)if(!combo.cards.includes(card))add([...r.board,card],[combo.cards],combo.weight);if(count%1000===0)progress(count/states)}}
+ if(exact){for(const combo of ranges[0]){if(!missing)add(r.board,[combo.cards],combo.weight);else {const available=deck.filter(c=>!combo.cards.includes(c));if(missing===1)for(const card of available)add([...r.board,card],[combo.cards],combo.weight);else for(let a=0;a<available.length;a++)for(let b=a+1;b<available.length;b++)add([...r.board,available[a],available[b]],[combo.cards],combo.weight);}if(count%1000===0)progress(count/states)}}
  else{const random=rng(r.seed??Math.floor(Math.random()*4294967296)),draws=ranges.map(sampler);let attempts=0;const start=Date.now();
  while(count<r.samples){attempts++;if(attempts>Math.max(200000,r.samples*100)||Date.now()-start>30000)throw Error('范围冲突过多或计算超过 30 秒预算，请放宽范围、减少对手或模拟次数。');
  const hands=draws.map(draw=>draw(random));const used=hands.flat();if(new Set(used).size!==used.length)continue;
