@@ -34,3 +34,7 @@ Minis 内置浏览器：真实按钮点击加载示例；精确枚举 990 组合
 ## 2.1 更新（以上 1.0 记录为历史）
 当前版本新增 RangeEditor、DrawPanel、DecisionSettings、SensitivityPanel、LibraryPanel、CardTextInput 组件；ranges/sampling/draws/cardText 引擎模块；storage 版本化备份与兼容 ID 模块；独立 sensitivity Worker。
 现有 26 项测试通过，包含 2,000 组七张牌与独立五张枚举的对照。范围、抽水与本地复盘已实现。完整最新功能、验收结果与未实现项见 RELEASE.md。用户最终触摸/软键盘问题待反馈，不标为已验收。
+
+## 自动部署与选牌浮层修复
+上传 main 分支后，GitHub Actions 自动 npm ci、运行测试、类型检查与构建，只有通过才部署 Pages。可在 Actions 手动运行；不需提交更新后的 dist 才能发布。Pages source 改为 GitHub Actions，不再从 gh-pages 直接发布。main/app.html 构建后自动改为站点 index.html。
+选牌弹层 Teleport 到 body，跟踪 visualViewport，在可见屏幕内居中，锁定背景滚动，牌区内部滚动，关闭按钮和清除按钮保持可见。360×800 和 360×480 预览验证弹窗边界及内部滚动；用户真实手机仍需确认。
