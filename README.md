@@ -38,3 +38,6 @@ Minis 内置浏览器：真实按钮点击加载示例；精确枚举 990 组合
 ## 自动部署与选牌浮层修复
 上传 main 分支后，GitHub Actions 自动 npm ci、运行测试、类型检查与构建，只有通过才部署 Pages。可在 Actions 手动运行；不需提交更新后的 dist 才能发布。Pages source 改为 GitHub Actions，不再从 gh-pages 直接发布。main/app.html 构建后自动改为站点 index.html。
 选牌弹层 Teleport 到 body，跟踪 visualViewport，在可见屏幕内居中，锁定背景滚动，牌区内部滚动，关闭按钮和清除按钮保持可见。360×800 和 360×480 预览验证弹窗边界及内部滚动；用户真实手机仍需确认。
+
+## 手机下拉菜单修复
+对手人数、相对位置、模拟预算均改用独立 OptionSelect.vue 网页内列表，不依赖 WebView 系统原生 select 弹窗。列表展开会撑开页面，避免被容器裁剪；选择后关闭，支持点击外部关闭、Escape 和方向键。全局触摸高亮设为透明，保留 focus-visible 键盘焦点提示。内置浏览器逐次点击确认人数选 3、预算选 100000、位置选 IP 生效，无原生 select 与横向溢出；26 项引擎测试与构建通过。
