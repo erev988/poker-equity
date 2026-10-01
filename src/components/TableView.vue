@@ -1,0 +1,7 @@
+<script setup lang="ts">
+import {computed} from 'vue';import {label,red} from '../engine/cards';import {handName} from '../engine/evaluator';import type {Scenario} from '../types';
+const props=defineProps<{scenario:Scenario}>();const emit=defineEmits<{pick:[zone:'hole'|'board',index:number]}>();
+const known=computed(()=>[...props.scenario.hole,...props.scenario.board].filter((c):c is number=>c!==null));
+const street=computed(()=>['翻牌前','','','翻牌','转牌','河牌'][props.scenario.board.filter(c=>c!==null).length]||'选牌中');
+</script>
+<template><section class="table"><div class="table-top"><span class="tag">{{street}}</span><span>{{scenario.opponents}} 位对手</span></div><div class="table-caption">公共牌 · COMMUNITY</div><div class="board cards"><button v-for="(card,i) in scenario.board" :key="i" :class="['playing-card',{red:card!==null&&red(card),empty:card===null}]" :aria-label="'公共牌 '+(i+1)" @click="emit('pick','board',i)"><template v-if="card!==null">{{label(card)}}</template><template v-else><span>＋</span><small>{{i<3?'翻牌':i===3?'转牌':'河牌'}}</small></template></button></div><div class="table-divider"></div><div class="table-caption">你的底牌 · HERO</div><div class="cards hero"><button v-for="(card,i) in scenario.hole" :key="i" :class="['playing-card',{red:card!==null&&red(card),empty:card===null}]" :aria-label="'底牌 '+(i+1)" @click="emit('pick','hole',i)">{{card===null?'＋':label(card)}}</button></div><div class="hand-label">{{known.length>=5?handName(known):'点击牌位，开始分析'}}</div></section></template>

@@ -1,0 +1,2 @@
+import {calculate} from '../engine/equity';import {presets} from '../engine/ranges';
+self.onmessage=e=>{try{const rows=[];for(const [name,range] of Object.entries(presets)){const result=calculate({...e.data,ranges:Array(e.data.opponents).fill(range),samples:10000,seed:12345});rows.push({name,result});self.postMessage({type:'progress',rows})}self.postMessage({type:'done',rows})}catch(e){self.postMessage({type:'error',message:(e as Error).message})}};

@@ -1,0 +1,13 @@
+import {it,expect} from 'vitest';import {parseRange,categories} from '../src/engine/ranges';import {calculate} from '../src/engine/equity';import {analyzeDraws} from '../src/engine/draws';import {initialScenario} from '../src/types';import {advise} from '../src/engine/advice';import {normalize,decode,encode} from '../src/storage/library';
+it('169 类别覆盖 1326 个组合',()=>{expect(categories.length).toBe(169);expect(parseRange(categories.join(',')).length).toBe(1326)});
+it('AA AKs AKo 组合数',()=>{expect(parseRange('AA').length).toBe(6);expect(parseRange('AKs').length).toBe(4);expect(parseRange('AKo').length).toBe(12)});
+it('死牌过滤',()=>expect(parseRange('AA',[12]).length).toBe(3));
+it('加号区间和权重',()=>{expect(parseRange('QQ+').length).toBe(18);expect(parseRange('77-JJ').length).toBe(30);expect(parseRange('AKs:0.5').every(c=>c.weight===.5)).toBe(true)});
+it('拒绝非法权重和文本',()=>{expect(()=>parseRange('AKs:2')).toThrow();expect(()=>parseRange('junk')).toThrow();expect(parseRange('AA:0')).toEqual([])});
+it('空合法范围拒绝',()=>expect(()=>calculate({hole:[12,25],board:[38,51,0,1,2],opponents:1,samples:1000,ranges:['AA']})).toThrow());
+it('转牌自动精确枚举',()=>{const r=calculate({hole:[12,25],board:[0,14,28,42],opponents:1,samples:1000,ranges:['KK']});expect(r.method).toBe('exact');expect(r.samples).toBe(264)});
+it('河牌权重枚举手工对照',()=>{const q={hole:[12,25],board:[0,14,28,42,8],opponents:1,samples:1000};const a=calculate({...q,ranges:['KK']}),b=calculate({...q,ranges:['QQ']}),mix=calculate({...q,ranges:['KK:0.25, QQ:0.75']});expect(mix.equity).toBeCloseTo(.25*a.equity+.75*b.equity,10)});
+it('抽水降低 EV',()=>{const a=advise({equity:.3,win:.3,tie:0,se:0,samples:1000,method:'exact'},{...initialScenario(),pot:'100',call:'25',rake:'5'});expect(a.ev).toBe(10.625)});
+it('下一张类别改善不重复且概率合理',()=>{const a=analyzeDraws([12,25],[0,14,28]);expect(a).not.toBeNull();expect(new Set(a!.improvements).size).toBe(a!.improvements.length);expect(a!.total).toBe(47);expect(a!.probability).toBeLessThanOrEqual(1)});
+it('备份往返与旧字段迁移',()=>{const s=initialScenario();const text=encode([{id:'x',name:'案例',date:'2026-10-02',scenario:s}]);expect(decode(text)[0].scenario).toEqual(s);const {ranges,...old}=s;expect(normalize(old).ranges).toEqual(ranges)});
+it('损坏备份拒绝',()=>{expect(()=>decode('{')).toThrow();expect(()=>decode('{"version":2,"entries":[]}')).toThrow();expect(()=>normalize({...initialScenario(),hole:[12,12]})).toThrow()});
